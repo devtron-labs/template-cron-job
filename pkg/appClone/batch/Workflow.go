@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 	pc "github.com/devtron-labs/template-cron-job/internal/sql/repository/app"
-	v1 "github.com/devtron-labs/template-cron-job/pkg/apis/template-cron-job/v1"
+	v1 "github.com/devtron-labs/template-cron-job/pkg/apis/devtron/v1"
 	"github.com/devtron-labs/template-cron-job/pkg/appWorkflow"
 	"github.com/devtron-labs/template-cron-job/util"
 	"github.com/go-pg/pg"

@@ -20,7 +20,7 @@ package batch
 import (
 	"encoding/json"
 	"fmt"
-	v1 "github.com/devtron-labs/template-cron-job/pkg/apis/template-cron-job/v1"
+	v1 "github.com/devtron-labs/template-cron-job/pkg/apis/devtron/v1"
 	"github.com/devtron-labs/template-cron-job/pkg/bean"
 	"reflect"
 	"strings"

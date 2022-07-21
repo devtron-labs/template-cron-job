@@ -20,7 +20,7 @@ package batch
 import (
 	"encoding/json"
 	"github.com/devtron-labs/template-cron-job/internal/sql/repository/app"
-	v1 "github.com/devtron-labs/template-cron-job/pkg/apis/template-cron-job/v1"
+	v1 "github.com/devtron-labs/template-cron-job/pkg/apis/devtron/v1"
 	"github.com/devtron-labs/template-cron-job/pkg/cluster"
 	"github.com/devtron-labs/template-cron-job/pkg/pipeline"
 	"go.uber.org/zap"

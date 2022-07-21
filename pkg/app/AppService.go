@@ -23,6 +23,7 @@ import (
 	"fmt"
 	client2 "github.com/devtron-labs/template-cron-job/api/helm-app"
 	"github.com/devtron-labs/template-cron-job/pkg/chart"
+	"github.com/robfig/cron/v3"
 	chart2 "k8s.io/helm/pkg/proto/hapi/chart"
 	"net/url"
 	"path"
@@ -150,6 +151,9 @@ func NewAppService(
 	chartTemplateService ChartTemplateService, refChartDir chartRepoRepository.RefChartDir,
 	chartRefRepository chartRepoRepository.ChartRefRepository,
 	chartService chart.ChartService, helmAppClient client2.HelmAppClient) *AppServiceImpl {
+	cron := cron.New(
+		cron.WithChain())
+	cron.Start()
 	appServiceImpl := &AppServiceImpl{
 		environmentConfigRepository:      environmentConfigRepository,
 		mergeUtil:                        mergeUtil,
@@ -191,6 +195,12 @@ func NewAppService(
 		chartService:                     chartService,
 		helmAppClient:                    helmAppClient,
 	}
+	/*_, err := cron.AddFunc(TemplateFixCronExpr, appServiceImpl.TemplateFixForAllApps)
+	if err != nil {
+		logger.Errorw("error in starting TemplateFixForAllApps cron job", "err", err)
+		return nil
+	}*/
+	appServiceImpl.TemplateFixForAllApps()
 	return appServiceImpl
 }
 func (impl AppServiceImpl) getValuesFileForEnv(environmentId int) string {
@@ -747,7 +757,6 @@ func (impl AppServiceImpl) TriggerRelease(overrideRequest *bean.ValuesOverrideRe
 	middleware.CdTriggerCounter.WithLabelValues(strconv.Itoa(pipeline.AppId), strconv.Itoa(pipeline.EnvironmentId), strconv.Itoa(pipeline.Id)).Inc()
 	return releaseId, saveErr
 }
-
 
 func (impl AppServiceImpl) autoHealChartLocationInChart(envOverride *chartConfig.EnvConfigOverride) error {
 	chartId := envOverride.Chart.Id
@@ -1697,4 +1706,60 @@ func (impl AppServiceImpl) createHelmAppForCdPipeline(overrideRequest *bean.Valu
 		}
 	}
 	return true, nil
+}
+
+const TemplateFixCronExpr string = "*/5 * * * *"
+
+func (impl AppServiceImpl) TemplateFixForAllApps() {
+	impl.logger.Info("data fix cron ..........")
+	apps, err := impl.appRepository.FindAll()
+	if err != nil {
+		impl.logger.Errorw("error fetching charts for app", "err", err)
+		return
+	}
+	content := "{{- range .Values.rawYaml }}\n---\n{{ toYaml . }}\n  {{- end -}}"
+	impl.logger.Infow("data fix for app", "content", content, "app size", len(apps))
+	for _, app := range apps {
+		impl.updateGenericInTemplateForApp(app.Id, content)
+	}
+}
+
+func (impl AppServiceImpl) updateGenericInTemplateForApp(appId int, content string) {
+	impl.logger.Infow("data fix for app", "appId", appId)
+	charts, err := impl.chartRepository.FindActiveChartsByAppId(appId)
+	if err != nil {
+		impl.logger.Errorw("error fetching charts for app", "err", err, "appId", appId, "charts size", len(charts))
+		return
+	}
+	impl.logger.Infow("data fix for app", "appId", appId, "charts size", len(charts))
+	count := 0
+	for _, chart := range charts {
+		chartRepoName := impl.GetChartRepoName(chart.GitRepoUrl)
+		chartGitAttr := &ChartConfig{
+			FileName:       "generic.yaml",
+			FileContent:    content,
+			ChartName:      chart.ChartName,
+			ChartLocation:  fmt.Sprintf("%s/templates", chart.ChartLocation),
+			ChartRepoName:  chartRepoName,
+			ReleaseMessage: "template generic content fix",
+			UserName:       "devtron",
+			UserEmailId:    "devtron@devtron.ai",
+		}
+		gitOpsConfigBitbucket, err := impl.gitOpsRepository.GetGitOpsConfigByProvider(BITBUCKET_PROVIDER)
+		if err != nil {
+			if err == pg.ErrNoRows {
+				gitOpsConfigBitbucket.BitBucketWorkspaceId = ""
+			} else {
+				impl.logger.Errorw("data fix for failed", "appId", appId, "chart", chart, "err", err)
+				continue
+			}
+		}
+		_, err = impl.gitFactory.Client.CommitValues(chartGitAttr, gitOpsConfigBitbucket.BitBucketWorkspaceId)
+		if err != nil {
+			impl.logger.Errorw("data fix for failed", "appId", appId, "chart", chart, "err", err)
+			continue
+		}
+		count = count + 1
+	}
+	impl.logger.Infow("data fix for app complete", "appId", appId, "charts size", len(charts), "succedded count", count)
 }

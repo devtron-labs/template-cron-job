@@ -22,7 +22,7 @@ import (
 	"github.com/devtron-labs/template-cron-job/internal/sql/repository/app"
 	"github.com/devtron-labs/template-cron-job/internal/sql/repository/appWorkflow"
 	pc "github.com/devtron-labs/template-cron-job/internal/sql/repository/pipelineConfig"
-	v1 "github.com/devtron-labs/template-cron-job/pkg/apis/template-cron-job/v1"
+	v1 "github.com/devtron-labs/template-cron-job/pkg/apis/devtron/v1"
 	"github.com/devtron-labs/template-cron-job/pkg/bean"
 	"github.com/devtron-labs/template-cron-job/pkg/pipeline"
 	"github.com/devtron-labs/template-cron-job/util"
