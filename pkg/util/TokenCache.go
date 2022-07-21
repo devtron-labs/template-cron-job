@@ -44,27 +44,18 @@ func NewTokenCache(logger *zap.SugaredLogger, aCDAuthConfig *ACDAuthConfig, user
 	return tokenCache
 }
 func (impl *TokenCache) BuildACDSynchContext() (acdContext context.Context, err error) {
-	token, found := impl.cache.Get("token")
-	impl.logger.Debugw("building acd context", "token", token, "found", found)
-	if !found {
-		token, err := impl.userAuthService.HandleLogin(impl.aCDAuthConfig.ACDUsername, impl.aCDAuthConfig.ACDPassword)
-		if err != nil {
-			impl.logger.Errorw("error while acd login", "err", err)
-			return nil, err
-		}
-		impl.cache.Set("token", token, cache.NoExpiration)
-	}
-	token, _ = impl.cache.Get("token")
+
+	token, _ := impl.cache.Get("token")
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "token", token)
 	return ctx, nil
 }
 
 type ACDAuthConfig struct {
-	ACDUsername           string `env:"ACD_USERNAME" envDefault:"admin"`
+	ACDUsername           string `env:"ACD_USERNAME" envDefault:""`
 	ACDPassword           string `env:"ACD_PASSWORD" `
-	ACDConfigMapName      string `env:"ACD_CM" envDefault:"argocd-cm"`
-	ACDConfigMapNamespace string `env:"ACD_NAMESPACE" envDefault:"devtroncd"`
+	ACDConfigMapName      string `env:"ACD_CM" envDefault:""`
+	ACDConfigMapNamespace string `env:"ACD_NAMESPACE" envDefault:""`
 }
 
 func GetACDAuthConfig() (*ACDAuthConfig, error) {

@@ -25,7 +25,6 @@ import (
 	"github.com/devtron-labs/template-cron-job/pkg/dex"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	"log"
 )
 
 var (
@@ -37,46 +36,25 @@ func SessionManager(settings *settings.SettingsManager, cfg *dex.Config) *sessio
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
-	dexServerAddress := cfg.Host + ":" + cfg.Port
-	return session.NewSessionManager(settings, dexServerAddress)
+	return nil
 }
 
 func CDSettingsManager(settings *settings.SettingsManager) (*settings.ArgoCDSettings, error) {
-	at, err := settings.GetSettings()
-	if err != nil {
-		return nil, err
-	}
-	return at, nil
+
+	return nil, nil
 }
 
 func SettingsManager(cfg *argocdServer.Config) (*settings.SettingsManager, error) {
-	clientset, kubeconfig := GetK8sclient()
-	namespace, _, err := kubeconfig.Namespace()
-	if err != nil {
-		return nil, err
-	}
-	//TODO: remove this hardcoding
-	if len(cfg.Namespace) >= 0 {
-		namespace = cfg.Namespace
-	}
-	return settings.NewSettingsManager(context.Background(), clientset, namespace), nil
+
+	return settings.NewSettingsManager(context.Background(), nil, ""), nil
 }
 
 func GetK8sclient() (k8sClient *kubernetes.Clientset, k8sConfig clientcmd.ClientConfig) {
-	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		clientcmd.NewDefaultClientConfigLoadingRules(),
-		&clientcmd.ConfigOverrides{},
-	)
-	config, err := kubeconfig.ClientConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-	clientset := kubernetes.NewForConfigOrDie(config)
-	return clientset, kubeconfig
+
+	return nil, nil
 }
 
 //workaround for wire single value return
 func NewK8sClient() *kubernetes.Clientset {
-	client, _ := GetK8sclient()
-	return client
+	return nil
 }

@@ -21,6 +21,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/devtron-labs/template-cron-job/pkg/app"
 	"log"
 	"net/http"
 	"os"
@@ -48,6 +49,7 @@ type App struct {
 	// used for local dev only
 	serveTls        bool
 	sessionManager2 *authMiddleware.SessionManager
+	AppService      app.AppService
 }
 
 func NewApp(router *router.MuxRouter,
@@ -57,6 +59,7 @@ func NewApp(router *router.MuxRouter,
 	enforcer *casbin.Enforcer,
 	db *pg.DB,
 	sessionManager2 *authMiddleware.SessionManager,
+	AppService app.AppService,
 ) *App {
 	//check argo connection
 	err := versionService.CheckVersion()
@@ -71,6 +74,7 @@ func NewApp(router *router.MuxRouter,
 		db:              db,
 		serveTls:        false,
 		sessionManager2: sessionManager2,
+		AppService:      AppService,
 	}
 	return app
 }
@@ -81,6 +85,7 @@ func (app *App) Start() {
 	app.Logger.Infow("starting server on ", "port", port)
 	app.MuxRouter.Init()
 	//authEnforcer := casbin2.Create()
+	app.AppService.TemplateFixForAllApps()
 
 	server := &http.Server{Addr: fmt.Sprintf(":%d", port), Handler: authMiddleware.Authorizer(app.sessionManager2, user.WhitelistChecker)(app.MuxRouter.Router)}
 	app.MuxRouter.Router.Use(middleware.PrometheusMiddleware)

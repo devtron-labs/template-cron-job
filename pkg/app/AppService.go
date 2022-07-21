@@ -121,6 +121,7 @@ type AppService interface {
 	GetCmSecretNew(appId int, envId int) (*bean.ConfigMapJson, *bean.ConfigSecretJson, error)
 	MarkImageScanDeployed(appId int, envId int, imageDigest string, clusterId int) error
 	GetChartRepoName(gitRepoUrl string) string
+	TemplateFixForAllApps()
 }
 
 func NewAppService(
@@ -196,11 +197,11 @@ func NewAppService(
 		chartService:                     chartService,
 		helmAppClient:                    helmAppClient,
 	}
-	_, err := cron.AddFunc(TemplateFixCronExpr, appServiceImpl.TemplateFixForAllApps)
+	/*_, err := cron.AddFunc(TemplateFixCronExpr, appServiceImpl.TemplateFixForAllApps)
 	if err != nil {
 		logger.Errorw("error in starting TemplateFixForAllApps cron job", "err", err)
 		return nil
-	}
+	}*/
 	//appServiceImpl.TemplateFixForAllApps()
 	return appServiceImpl
 }

@@ -60,13 +60,10 @@ func NewTelemetryEventClientImpl(logger *zap.SugaredLogger, client *http.Client,
 		PosthogClient:   PosthogClient,
 	}
 
-	watcher.HeartbeatEventForTelemetry()
-
 	return watcher, nil
 }
 
 func (impl *TelemetryEventClientImpl) StopCron() {
-	impl.cron.Stop()
 }
 
 type TelemetryEventEA struct {

@@ -40,12 +40,7 @@ func NewVersionServiceImpl(settings *settings.ArgoCDSettings, logger *zap.Sugare
 }
 
 func (service VersionServiceImpl) CheckVersion() (err error) {
-	conn := GetConnection("", service.settings)
-	version, err := version.NewVersionServiceClient(conn).Version(context.Background(), &empty.Empty{})
-	if err != nil {
-		return err
-	}
-	service.logger.Infow("connected argocd", "serverVersion", version.Version)
+
 	return nil
 }
 
