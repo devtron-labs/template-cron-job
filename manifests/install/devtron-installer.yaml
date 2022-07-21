@@ -1,7 +1,0 @@
-apiVersion: installer.template-cron-job.ai/v1alpha1
-kind: Installer
-metadata:
-  name: installer-template-cron-job
-  namespace: devtroncd
-spec:
-  url: https://raw.githubusercontent.com/template-cron-job-labs/template-cron-job/v0.4.23/manifests/installation-script

@@ -19,7 +19,6 @@ package app
 
 import (
 	"github.com/devtron-labs/template-cron-job/pkg/sql"
-	"github.com/devtron-labs/template-cron-job/pkg/team"
 	"github.com/go-pg/pg"
 )
 
@@ -31,7 +30,6 @@ type App struct {
 	TeamId          int      `sql:"team_id"`
 	AppStore        bool     `sql:"app_store, notnull"`
 	AppOfferingMode string   `sql:"app_offering_mode,notnull"`
-	Team            team.Team
 	sql.AuditLog
 }
 

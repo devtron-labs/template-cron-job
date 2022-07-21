@@ -19,7 +19,6 @@ package chartRepoRepository
 
 import (
 	"github.com/devtron-labs/template-cron-job/internal/sql/models"
-	"github.com/devtron-labs/template-cron-job/internal/sql/repository"
 	"github.com/devtron-labs/template-cron-job/pkg/sql"
 	"github.com/go-pg/pg"
 	"strings"
@@ -227,19 +226,19 @@ func (repositoryImpl ChartRepositoryImpl) FindNumberOfAppsWithDeploymentTemplate
 //---------------------------chart repository------------------
 
 type ChartRepo struct {
-	tableName   struct{}            `sql:"chart_repo"`
-	Id          int                 `sql:"id,pk"`
-	Name        string              `sql:"name"`
-	Url         string              `sql:"url"`
-	Active      bool                `sql:"active,notnull"`
-	Default     bool                `sql:"is_default,notnull"`
-	UserName    string              `sql:"user_name"`
-	Password    string              `sql:"password"`
-	SshKey      string              `sql:"ssh_key"`
-	AccessToken string              `sql:"access_token"`
-	AuthMode    repository.AuthMode `sql:"auth_mode,notnull"`
-	External    bool                `sql:"external,notnull"`
-	Deleted     bool                `sql:"deleted,notnull"`
+	tableName   struct{} `sql:"chart_repo"`
+	Id          int      `sql:"id,pk"`
+	Name        string   `sql:"name"`
+	Url         string   `sql:"url"`
+	Active      bool     `sql:"active,notnull"`
+	Default     bool     `sql:"is_default,notnull"`
+	UserName    string   `sql:"user_name"`
+	Password    string   `sql:"password"`
+	SshKey      string   `sql:"ssh_key"`
+	AccessToken string   `sql:"access_token"`
+	//AuthMode    repository.AuthMode `sql:"auth_mode,notnull"`
+	External bool `sql:"external,notnull"`
+	Deleted  bool `sql:"deleted,notnull"`
 	sql.AuditLog
 }
 
