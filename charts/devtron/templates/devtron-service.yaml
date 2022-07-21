@@ -1,0 +1,41 @@
+{{- if $.Values.components }}
+{{- if $.Values.components.template-cron-job }}
+{{- if $.Values.components.template-cron-job.service }}
+{{- with $.Values.components.template-cron-job.service }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: template-cron-job
+    release: template-cron-job
+    {{- if .labels }}
+{{ toYaml .labels | indent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/resource-policy": keep
+    {{- if .annotations }}
+{{ toYaml .annotations | indent 4 }}
+    {{- end }}
+  name: template-cron-job-service
+  namespace: devtroncd
+spec:
+  ports:
+  - name: template-cron-job
+    port: {{ .port }}
+    {{- if .nodePort }}
+    nodePort: {{ .nodePort }}
+    {{- end }}
+    protocol: TCP
+    targetPort: template-cron-job
+{{- if .loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+{{ toYaml .loadBalancerSourceRanges | nindent 4}}
+{{- end }}
+  selector:
+    app: template-cron-job
+  sessionAffinity: None
+  type: {{ .type }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

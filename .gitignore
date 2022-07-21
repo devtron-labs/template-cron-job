@@ -3,4 +3,4 @@
 .vscode
 .env
 /cmd/external-app/devtron-ea
-devtron
+template-cron-job

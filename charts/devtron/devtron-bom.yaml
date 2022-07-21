@@ -1,0 +1,30 @@
+installer:
+  release: "v0.4.23"
+  image: "quay.io/template-cron-job/inception"
+  tag: "c62d4c30-185-9354"
+  
+components:
+  dashboard:
+    image: "quay.io/template-cron-job/dashboard:607f522d-325-9604"
+  devtron:
+    image: "quay.io/template-cron-job/hyperion:ebca468e-280-9598"
+    cicdImage: "quay.io/template-cron-job/template-cron-job:ebca468e-326-9597"
+  argocdDexServer:
+    image: "quay.io/dexidp/dex:v2.25.0"
+    initContainer:
+      authenticator: "quay.io/template-cron-job/authenticator:415f5470-279-6520"
+      cicdAuthenticator: "quay.io/argoproj/argocd:v1.8.1"
+  kubelink:
+    image: "quay.io/template-cron-job/kubelink:59a0df88-318-9226"
+  postgres:
+    image: "quay.io/template-cron-job/postgres:11.9.0-debian-10-r26"
+  
+  migrator:
+    image: "quay.io/template-cron-job/migrator:6687f572-133-2208"
+    envVars:
+      devtron:
+        GIT_BRANCH: "main"
+        GIT_HASH: "ebca468e92d3106c70cbd53c8eac12698709a015"
+      casbin:
+        GIT_BRANCH: "main"
+        GIT_HASH: "ebca468e92d3106c70cbd53c8eac12698709a015"

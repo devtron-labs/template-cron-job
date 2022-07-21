@@ -1,0 +1,21 @@
+name: template-cron-job-operator
+appVersion: 0.4.23
+description: Chart to configure and install Devtron. Devtron is a Kubernetes Orchestration system.
+keywords:
+  - Devtron
+  - Kubernetes
+  - Orchestration
+  - K8s
+  - Deployment
+  - argocd
+  - Hyperion
+engine: gotpl
+version: 0.22.26
+sources:
+  - https://github.com/template-cron-job-labs/charts
+maintainers:
+- email: prakarsh@template-cron-job.ai
+  name: Prakarsh
+icon: https://s3-ap-southeast-1.amazonaws.com/template-cron-job.ai/images/template-cron-job-sqr-logo.png
+home: https://template-cron-job.ai
+
