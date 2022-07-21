@@ -1,7 +1,5 @@
 package chartRepo
 
-import "github.com/devtron-labs/template-cron-job/internal/sql/repository"
-
 const ValidationSuccessMsg = "Configurations are validated successfully"
 
 type ChartRepoDto struct {
@@ -12,7 +10,6 @@ type ChartRepoDto struct {
 	Password    string              `json:"password,omitempty"`
 	SshKey      string              `json:"sshKey,omitempty"`
 	AccessToken string              `json:"accessToken,omitempty"`
-	AuthMode    repository.AuthMode `json:"authMode,omitempty" validate:"required"`
 	Active      bool                `json:"active"`
 	Default     bool                `json:"default"`
 	UserId      int32               `json:"-"`

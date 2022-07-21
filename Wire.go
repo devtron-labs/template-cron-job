@@ -25,6 +25,7 @@ import (
 	"github.com/devtron-labs/template-cron-job/internal/sql/repository"
 	"github.com/devtron-labs/template-cron-job/internal/sql/repository/app"
 	"github.com/devtron-labs/template-cron-job/internal/util"
+	app2 "github.com/devtron-labs/template-cron-job/pkg/app"
 	chartRepoRepository "github.com/devtron-labs/template-cron-job/pkg/chartRepo/repository"
 	"github.com/devtron-labs/template-cron-job/pkg/sql"
 	"github.com/google/wire"
@@ -36,13 +37,15 @@ func InitializeApp() (*App, error) {
 		util.NewSugardLogger,
 		sql.PgSqlWireSet,
 		router.NewMuxRouter,
+		app2.NewAppService,
+		wire.Bind(new(app2.AppService), new(*app2.AppServiceImpl)),
 		app.NewAppRepositoryImpl,
 		wire.Bind(new(app.AppRepository), new(*app.AppRepositoryImpl)),
-		chartRepoRepository.NewChartRepoRepositoryImpl,
-		wire.Bind(new(chartRepoRepository.ChartRepoRepository), new(*chartRepoRepository.ChartRepoRepositoryImpl)),
+		chartRepoRepository.NewChartRepository,
+		wire.Bind(new(chartRepoRepository.ChartRepository), new(*chartRepoRepository.ChartRepositoryImpl)),
 		repository.NewGitOpsConfigRepositoryImpl,
 		wire.Bind(new(repository.GitOpsConfigRepository), new(*repository.GitOpsConfigRepositoryImpl)),
-
+		NewApp,
 		util.NewGitFactory,
 		util.NewGitCliUtil,
 

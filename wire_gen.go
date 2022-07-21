@@ -6,14 +6,44 @@
 package main
 
 import (
+	"github.com/devtron-labs/template-cron-job/api/router"
+	"github.com/devtron-labs/template-cron-job/internal/sql/repository"
+	"github.com/devtron-labs/template-cron-job/internal/sql/repository/app"
+	"github.com/devtron-labs/template-cron-job/internal/util"
+	app2 "github.com/devtron-labs/template-cron-job/pkg/app"
+	"github.com/devtron-labs/template-cron-job/pkg/chartRepo/repository"
+	"github.com/devtron-labs/template-cron-job/pkg/sql"
+)
+
+import (
 	_ "github.com/lib/pq"
 )
 
 // Injectors from Wire.go:
 
 func InitializeApp() (*App, error) {
-
-	return nil, nil
+	sugaredLogger, err := util.NewSugardLogger()
+	if err != nil {
+		return nil, err
+	}
+	config, err := sql.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+	db, err := sql.NewDbConnection(config, sugaredLogger)
+	if err != nil {
+		return nil, err
+	}
+	gitOpsConfigRepositoryImpl := repository.NewGitOpsConfigRepositoryImpl(sugaredLogger, db)
+	appRepositoryImpl := app.NewAppRepositoryImpl(db)
+	chartRepositoryImpl := chartRepoRepository.NewChartRepository(db)
+	gitCliUtil := util.NewGitCliUtil(sugaredLogger)
+	gitFactory, err := util.NewGitFactory(sugaredLogger, gitOpsConfigRepositoryImpl, gitCliUtil)
+	if err != nil {
+		return nil, err
+	}
+	appServiceImpl := app2.NewAppService(sugaredLogger, appRepositoryImpl, chartRepositoryImpl, gitFactory, gitOpsConfigRepositoryImpl)
+	muxRouter := router.NewMuxRouter(sugaredLogger, gitOpsConfigRepositoryImpl, appServiceImpl)
+	mainApp := NewApp(muxRouter, sugaredLogger, db, appServiceImpl)
+	return mainApp, nil
 }
-
-var ()

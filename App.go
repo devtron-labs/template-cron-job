@@ -19,14 +19,13 @@ package main
 
 import (
 	"context"
-	"github.com/devtron-labs/template-cron-job/pkg/app"
-	"net/http"
-	"time"
-
 	"github.com/devtron-labs/template-cron-job/api/router"
+	"github.com/devtron-labs/template-cron-job/pkg/app"
 	"github.com/go-pg/pg"
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
+	"net/http"
+	"time"
 )
 
 type App struct {
@@ -35,22 +34,20 @@ type App struct {
 	server     *http.Server
 	db         *pg.DB
 	serveTls   bool
-	AppService app.AppService
+	appService app.AppService
 }
 
 func NewApp(router *router.MuxRouter,
 	Logger *zap.SugaredLogger,
 	db *pg.DB,
-	AppService app.AppService,
+	appService app.AppService,
 ) *App {
-	//check argo connection
-
 	app := &App{
 		MuxRouter:  router,
 		Logger:     Logger,
 		db:         db,
 		serveTls:   false,
-		AppService: AppService,
+		appService: appService,
 	}
 	return app
 }
@@ -60,8 +57,7 @@ func (app *App) Start() {
 	app.Logger.Debugw("starting server")
 	app.Logger.Infow("starting server on ", "port", port)
 	app.MuxRouter.Init()
-	//authEnforcer := casbin2.Create()
-	app.AppService.TemplateFixForAllApps()
+	app.appService.TemplateFixForAllApps()
 }
 
 func (app *App) Stop() {
