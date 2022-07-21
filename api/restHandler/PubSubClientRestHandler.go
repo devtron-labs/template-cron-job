@@ -18,14 +18,9 @@
 package restHandler
 
 import (
-	"encoding/json"
-	"net/http"
-	"strings"
-
-	"github.com/devtron-labs/template-cron-job/api/restHandler/common"
-	"github.com/devtron-labs/template-cron-job/client/pubsub"
 	"github.com/devtron-labs/template-cron-job/pkg/pipeline"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 type PubSubClientRestHandler interface {
@@ -33,49 +28,17 @@ type PubSubClientRestHandler interface {
 }
 
 type PubSubClientRestHandlerImpl struct {
-	natsPublishClient pubsub.NatsPublishClient
-	logger            *zap.SugaredLogger
-	cdConfig          *pipeline.CdConfig
+	logger   *zap.SugaredLogger
+	cdConfig *pipeline.CdConfig
 }
 
-func NewPubSubClientRestHandlerImpl(natsPublishClient pubsub.NatsPublishClient, logger *zap.SugaredLogger, cdConfig *pipeline.CdConfig) *PubSubClientRestHandlerImpl {
+func NewPubSubClientRestHandlerImpl(logger *zap.SugaredLogger, cdConfig *pipeline.CdConfig) *PubSubClientRestHandlerImpl {
 	return &PubSubClientRestHandlerImpl{
-		natsPublishClient: natsPublishClient,
-		logger:            logger,
-		cdConfig:          cdConfig,
+		logger:   logger,
+		cdConfig: cdConfig,
 	}
 }
 
 func (impl *PubSubClientRestHandlerImpl) PublishEventsToNats(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	var publishRequest pubsub.PublishRequest
-	err := decoder.Decode(&publishRequest)
-	if err != nil {
-		impl.logger.Errorw("request err, HandleExternalCiWebhook", "err", err, "payload", publishRequest)
-		common.WriteJsonResp(w, err, nil, http.StatusBadRequest)
-		return
-	}
 
-	reqToken := r.Header.Get("Authorization")
-	splitToken := strings.Split(reqToken, "Bearer")
-	if len(splitToken) != 2 {
-		impl.logger.Debugw("request err, HandleExternalCiWebhook", "payload", publishRequest, "token", reqToken)
-		common.WriteJsonResp(w, err, nil, http.StatusBadRequest)
-		return
-	}
-	reqToken = strings.TrimSpace(splitToken[1])
-	if impl.cdConfig.OrchestratorToken != reqToken {
-		common.WriteJsonResp(w, err, "Unauthorized req", http.StatusUnauthorized)
-		return
-	}
-
-	err = impl.natsPublishClient.Publish(&publishRequest)
-	if err != nil {
-		impl.logger.Errorw("service err, HandleExternalCiWebhook", "err", err, "payload", publishRequest)
-		common.WriteJsonResp(w, err, nil, http.StatusInternalServerError)
-		return
-	}
-	// result := make(map[string]string)
-	// result["id"] = id
-	common.WriteJsonResp(w, err, nil, http.StatusAccepted)
 }

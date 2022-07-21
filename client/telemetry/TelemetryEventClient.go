@@ -51,11 +51,7 @@ func NewTelemetryEventClientImpl(logger *zap.SugaredLogger, client *http.Client,
 	K8sUtil *util2.K8sUtil, aCDAuthConfig *util3.ACDAuthConfig, userService user.UserService,
 	attributeRepo repository.AttributesRepository, ssoLoginService sso.SSOLoginService,
 	PosthogClient *PosthogClient) (*TelemetryEventClientImpl, error) {
-	cron := cron.New(
-		cron.WithChain())
-	cron.Start()
 	watcher := &TelemetryEventClientImpl{
-		cron:   cron,
 		logger: logger,
 		client: client, clusterService: clusterService,
 		K8sUtil: K8sUtil, aCDAuthConfig: aCDAuthConfig,
@@ -65,18 +61,8 @@ func NewTelemetryEventClientImpl(logger *zap.SugaredLogger, client *http.Client,
 	}
 
 	watcher.HeartbeatEventForTelemetry()
-	_, err := cron.AddFunc(SummaryCronExpr, watcher.SummaryEventForTelemetryEA)
-	if err != nil {
-		logger.Errorw("error in starting summery event", "err", err)
-		return nil, err
-	}
 
-	_, err = cron.AddFunc(HeartbeatCronExpr, watcher.HeartbeatEventForTelemetry)
-	if err != nil {
-		logger.Errorw("error in starting heartbeat event", "err", err)
-		return nil, err
-	}
-	return watcher, err
+	return watcher, nil
 }
 
 func (impl *TelemetryEventClientImpl) StopCron() {

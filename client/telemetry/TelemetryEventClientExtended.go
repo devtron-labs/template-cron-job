@@ -13,7 +13,6 @@ import (
 	util3 "github.com/devtron-labs/template-cron-job/pkg/util"
 	"github.com/devtron-labs/template-cron-job/util"
 	"github.com/go-pg/pg"
-	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
@@ -49,10 +48,6 @@ func NewTelemetryEventClientImplExtended(logger *zap.SugaredLogger, client *http
 	dockerArtifactStoreRepository repository.DockerArtifactStoreRepository,
 	materialRepository pipelineConfig.MaterialRepository, ciTemplateRepository pipelineConfig.CiTemplateRepository,
 	chartRepository chartRepoRepository.ChartRepository) (*TelemetryEventClientImplExtended, error) {
-
-	cron := cron.New(
-		cron.WithChain())
-	cron.Start()
 	watcher := &TelemetryEventClientImplExtended{
 		environmentService:            environmentService,
 		appListingRepository:          appListingRepository,
@@ -68,7 +63,6 @@ func NewTelemetryEventClientImplExtended(logger *zap.SugaredLogger, client *http
 		ciTemplateRepository:          ciTemplateRepository,
 		chartRepository:               chartRepository,
 		TelemetryEventClientImpl: &TelemetryEventClientImpl{
-			cron:            cron,
 			logger:          logger,
 			client:          client,
 			clusterService:  clusterService,
@@ -81,52 +75,40 @@ func NewTelemetryEventClientImplExtended(logger *zap.SugaredLogger, client *http
 		},
 	}
 
-	watcher.HeartbeatEventForTelemetry()
-	_, err := cron.AddFunc(SummaryCronExpr, watcher.SummaryEventForTelemetry)
-	if err != nil {
-		logger.Errorw("error in starting summery event", "err", err)
-		return nil, err
-	}
-
-	_, err = cron.AddFunc(HeartbeatCronExpr, watcher.HeartbeatEventForTelemetry)
-	if err != nil {
-		logger.Errorw("error in starting heartbeat event", "err", err)
-		return nil, err
-	}
-	return watcher, err
+	return watcher, nil
 }
 
 type TelemetryEventDto struct {
-	UCID         string             `json:"ucid"` //unique client id
- 	Timestamp    time.Time          `json:"timestamp"`
- 	EventMessage string             `json:"eventMessage,omitempty"`
- 	EventType    TelemetryEventType `json:"eventType"`
- 	ProdAppCount                         int    `json:"prodAppCount,omitempty"`
- 	NonProdAppCount                      int    `json:"nonProdAppCount,omitempty"`
- 	UserCount                            int    `json:"userCount,omitempty"`
- 	EnvironmentCount                     int    `json:"environmentCount,omitempty"`
- 	ClusterCount                         int    `json:"clusterCount,omitempty"`
- 	CiCountPerDay                        int    `json:"ciCountPerDay,omitempty"`
- 	CdCountPerDay                        int    `json:"cdCountPerDay,omitempty"`
- 	HelmChartCount                       int    `json:"helmChartCount,omitempty"`
- 	SecurityScanCountPerDay              int    `json:"securityScanCountPerDay,omitempty"`
- 	GitAccountsCount                     int    `json:"gitAccountsCount,omitempty"`
- 	GitOpsCount                          int    `json:"gitOpsCount,omitempty"`
- 	RegistryCount                        int    `json:"registryCount,omitempty"`
- 	HostURL                              bool   `json:"hostURL,omitempty"`
- 	SSOLogin                             bool   `json:"ssoLogin,omitempty"`
- 	AppCount                             int    `json:"appCount,omitempty"`
- 	AppsWithGitRepoConfigured            int    `json:"appsWithGitRepoConfigured,omitempty"`
- 	AppsWithDockerConfigured             int    `json:"appsWithDockerConfigured,omitempty"`
- 	AppsWithDeploymentTemplateConfigured int    `json:"appsWithDeploymentTemplateConfigured,omitempty"`
- 	AppsWithCiPipelineConfigured         int    `json:"appsWithCiPipelineConfigured,omitempty"`
- 	AppsWithCdPipelineConfigured         int    `json:"appsWithCdPipelineConfigured,omitempty"`
- 	Build                                bool   `json:"build,omitempty"`
- 	Deployment                           bool   `json:"deployment,omitempty"`
- 	ServerVersion                        string `json:"serverVersion,omitempty"`
- 	DevtronGitVersion                    string `json:"devtronGitVersion,omitempty"`
- 	DevtronVersion                       string `json:"devtronVersion,omitempty"`
- 	DevtronMode                          string `json:"devtronMode,omitempty"`
+	UCID                                 string             `json:"ucid"` //unique client id
+	Timestamp                            time.Time          `json:"timestamp"`
+	EventMessage                         string             `json:"eventMessage,omitempty"`
+	EventType                            TelemetryEventType `json:"eventType"`
+	ProdAppCount                         int                `json:"prodAppCount,omitempty"`
+	NonProdAppCount                      int                `json:"nonProdAppCount,omitempty"`
+	UserCount                            int                `json:"userCount,omitempty"`
+	EnvironmentCount                     int                `json:"environmentCount,omitempty"`
+	ClusterCount                         int                `json:"clusterCount,omitempty"`
+	CiCountPerDay                        int                `json:"ciCountPerDay,omitempty"`
+	CdCountPerDay                        int                `json:"cdCountPerDay,omitempty"`
+	HelmChartCount                       int                `json:"helmChartCount,omitempty"`
+	SecurityScanCountPerDay              int                `json:"securityScanCountPerDay,omitempty"`
+	GitAccountsCount                     int                `json:"gitAccountsCount,omitempty"`
+	GitOpsCount                          int                `json:"gitOpsCount,omitempty"`
+	RegistryCount                        int                `json:"registryCount,omitempty"`
+	HostURL                              bool               `json:"hostURL,omitempty"`
+	SSOLogin                             bool               `json:"ssoLogin,omitempty"`
+	AppCount                             int                `json:"appCount,omitempty"`
+	AppsWithGitRepoConfigured            int                `json:"appsWithGitRepoConfigured,omitempty"`
+	AppsWithDockerConfigured             int                `json:"appsWithDockerConfigured,omitempty"`
+	AppsWithDeploymentTemplateConfigured int                `json:"appsWithDeploymentTemplateConfigured,omitempty"`
+	AppsWithCiPipelineConfigured         int                `json:"appsWithCiPipelineConfigured,omitempty"`
+	AppsWithCdPipelineConfigured         int                `json:"appsWithCdPipelineConfigured,omitempty"`
+	Build                                bool               `json:"build,omitempty"`
+	Deployment                           bool               `json:"deployment,omitempty"`
+	ServerVersion                        string             `json:"serverVersion,omitempty"`
+	DevtronGitVersion                    string             `json:"devtronGitVersion,omitempty"`
+	DevtronVersion                       string             `json:"devtronVersion,omitempty"`
+	DevtronMode                          string             `json:"devtronMode,omitempty"`
 }
 
 func (impl *TelemetryEventClientImplExtended) SummaryEventForTelemetry() {

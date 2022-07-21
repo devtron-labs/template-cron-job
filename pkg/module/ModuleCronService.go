@@ -18,10 +18,8 @@
 package module
 
 import (
-	"fmt"
 	serverBean "github.com/devtron-labs/template-cron-job/pkg/server/bean"
 	serverEnvConfig "github.com/devtron-labs/template-cron-job/pkg/server/config"
-	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 	"time"
 )
@@ -31,7 +29,6 @@ type ModuleCronService interface {
 
 type ModuleCronServiceImpl struct {
 	logger           *zap.SugaredLogger
-	cron             *cron.Cron
 	moduleEnvConfig  *ModuleEnvConfig
 	moduleRepository ModuleRepository
 	serverEnvConfig  *serverEnvConfig.ServerEnvConfig
@@ -50,18 +47,7 @@ func NewModuleCronServiceImpl(logger *zap.SugaredLogger, moduleEnvConfig *Module
 	if serverEnvConfig.DevtronInstallationType == serverBean.DevtronInstallationTypeOssHelm {
 		// cron job to update status as timeout if installing state keeps in more than 1 hour
 		// initialise cron
-		cron := cron.New(
-			cron.WithChain())
-		cron.Start()
 
-		// add function into cron
-		_, err := cron.AddFunc(fmt.Sprintf("@every %dm", moduleEnvConfig.ModuleTimeoutStatusHandlingCronDurationInMin), moduleCronServiceImpl.HandleModuleTimeoutStatus)
-		if err != nil {
-			fmt.Println("error in adding cron function into module cron service")
-			return nil, err
-		}
-
-		moduleCronServiceImpl.cron = cron
 	}
 
 	return moduleCronServiceImpl, nil

@@ -18,7 +18,6 @@ import (
 	"github.com/devtron-labs/template-cron-job/api/team"
 	"github.com/devtron-labs/template-cron-job/api/user"
 	"github.com/devtron-labs/template-cron-job/client/dashboard"
-	"github.com/devtron-labs/template-cron-job/util"
 	"github.com/devtron-labs/template-cron-job/util/k8s"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
@@ -110,86 +109,5 @@ func (r *MuxRouter) Init() {
 		}
 		_, _ = writer.Write(b)
 	})
-	baseRouter := r.Router.PathPrefix("/orchestrator/").Subrouter()
-	baseRouter.Path("/version").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(200)
-		response := common.Response{}
-		response.Code = 200
-		response.Result = util.GetDevtronVersion()
-		b, err := json.Marshal(response)
-		if err != nil {
-			b = []byte("OK")
-			r.logger.Errorw("Unexpected error in apiError", "err", err)
-		}
-		_, _ = writer.Write(b)
-	})
 
-	ssoLoginRouter := baseRouter.PathPrefix("/sso").Subrouter()
-	r.ssoLoginRouter.InitSsoLoginRouter(ssoLoginRouter)
-	teamRouter := baseRouter.PathPrefix("/team").Subrouter()
-	r.teamRouter.InitTeamRouter(teamRouter)
-	rootRouter := baseRouter.PathPrefix("/").Subrouter()
-	r.UserAuthRouter.InitUserAuthRouter(rootRouter)
-	userRouter := baseRouter.PathPrefix("/user").Subrouter()
-	r.userRouter.InitUserRouter(userRouter)
-
-	clusterRouter := baseRouter.PathPrefix("/cluster").Subrouter()
-	r.clusterRouter.InitClusterRouter(clusterRouter)
-
-	environmentClusterMappingsRouter := r.Router.PathPrefix("/orchestrator/env").Subrouter()
-	r.environmentRouter.InitEnvironmentClusterMappingsRouter(environmentClusterMappingsRouter)
-
-	r.Router.Path("/").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		http.Redirect(writer, request, "/dashboard", 301)
-	})
-	dashboardRouter := r.Router.PathPrefix("/dashboard").Subrouter()
-	r.dashboardRouter.InitDashboardRouter(dashboardRouter)
-
-	applicationSubRouter := r.Router.PathPrefix("/orchestrator/application").Subrouter()
-	r.helmAppRouter.InitAppListRouter(applicationSubRouter)
-	r.commonDeploymentRouter.Init(applicationSubRouter)
-
-	k8sApp := r.Router.PathPrefix("/orchestrator/k8s").Subrouter()
-	r.k8sApplicationRouter.InitK8sApplicationRouter(k8sApp)
-
-	// chart-repo router starts
-	chartRepoRouter := r.Router.PathPrefix("/orchestrator/chart-repo").Subrouter()
-	r.chartRepositoryRouter.Init(chartRepoRouter)
-	// chart-repo router ends
-
-	// app-store discover router starts
-	appStoreDiscoverSubRouter := r.Router.PathPrefix("/orchestrator/app-store/discover").Subrouter()
-	r.appStoreDiscoverRouter.Init(appStoreDiscoverSubRouter)
-	// app-store discover router ends
-
-	//  app-store values starts
-	appStoreValuesSubRouter := r.Router.PathPrefix("/orchestrator/app-store/values").Subrouter()
-	r.appStoreValuesRouter.Init(appStoreValuesSubRouter)
-	// app-store values router ends
-
-	//  app-store deployment router starts
-	appStoreDeploymentSubRouter := r.Router.PathPrefix("/orchestrator/app-store/deployment").Subrouter()
-	r.appStoreDeploymentRouter.Init(appStoreDeploymentSubRouter)
-	// app-store deployment router ends
-
-	//  dashboard event router starts
-	dashboardTelemetryRouter := r.Router.PathPrefix("/orchestrator/dashboard-event").Subrouter()
-	r.dashboardTelemetryRouter.Init(dashboardTelemetryRouter)
-	// dashboard event router ends
-
-	externalLinkRouter := r.Router.PathPrefix("/orchestrator/external-links").Subrouter()
-	r.externalLinksRouter.InitExternalLinkRouter(externalLinkRouter)
-
-	// module router
-	moduleRouter := r.Router.PathPrefix("/orchestrator/module").Subrouter()
-	r.moduleRouter.Init(moduleRouter)
-
-	// server router
-	serverRouter := r.Router.PathPrefix("/orchestrator/server").Subrouter()
-	r.serverRouter.Init(serverRouter)
-
-	// api-token router
-	apiTokenRouter := r.Router.PathPrefix("/orchestrator/api-token").Subrouter()
-	r.apiTokenRouter.InitApiTokenRouter(apiTokenRouter)
 }

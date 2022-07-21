@@ -55,7 +55,6 @@ import (
 	"github.com/devtron-labs/template-cron-job/client/grafana"
 	jClient "github.com/devtron-labs/template-cron-job/client/jira"
 	"github.com/devtron-labs/template-cron-job/client/lens"
-	pubsub2 "github.com/devtron-labs/template-cron-job/client/pubsub"
 	"github.com/devtron-labs/template-cron-job/client/telemetry"
 	"github.com/devtron-labs/template-cron-job/internal/sql/repository"
 	app2 "github.com/devtron-labs/template-cron-job/internal/sql/repository/app"
@@ -386,8 +385,6 @@ func InitializeApp() (*App, error) {
 		pipeline.NewCiLogServiceImpl,
 		wire.Bind(new(pipeline.CiLogService), new(*pipeline.CiLogServiceImpl)),
 
-		pubsub2.NewPubSubClient,
-
 		pubsub.NewGitWebhookHandler,
 		wire.Bind(new(pubsub.GitWebhookHandler), new(*pubsub.GitWebhookHandlerImpl)),
 
@@ -510,8 +507,7 @@ func InitializeApp() (*App, error) {
 		wire.Bind(new(repository.DeploymentGroupAppRepository), new(*repository.DeploymentGroupAppRepositoryImpl)),
 		restHandler.NewPubSubClientRestHandlerImpl,
 		wire.Bind(new(restHandler.PubSubClientRestHandler), new(*restHandler.PubSubClientRestHandlerImpl)),
-		pubsub2.NewNatsPublishClientImpl,
-		wire.Bind(new(pubsub2.NatsPublishClient), new(*pubsub2.NatsPublishClientImpl)),
+
 
 		//Batch actions
 		batch.NewWorkflowActionImpl,

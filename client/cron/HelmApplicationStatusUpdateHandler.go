@@ -26,22 +26,14 @@ const HelmAppStatusUpdateCronExpr string = "*/2 * * * *"
 func NewHelmApplicationStatusUpdateHandlerImpl(logger *zap.SugaredLogger, appService app.AppService,
 	workflowDagExecutor pipeline.WorkflowDagExecutor, installedAppService service.InstalledAppService,
 	CdHandler pipeline.CdHandler) *HelmApplicationStatusUpdateHandlerImpl {
-	cron := cron.New(
-		cron.WithChain())
-	cron.Start()
 	impl := &HelmApplicationStatusUpdateHandlerImpl{
 		logger:              logger,
-		cron:                cron,
 		appService:          appService,
 		workflowDagExecutor: workflowDagExecutor,
 		installedAppService: installedAppService,
 		CdHandler:           CdHandler,
 	}
-	_, err := cron.AddFunc(HelmAppStatusUpdateCronExpr, impl.HelmApplicationStatusUpdate)
-	if err != nil {
-		logger.Errorw("error in starting helm application status update cron job", "err", err)
-		return nil
-	}
+
 	return impl
 }
 
