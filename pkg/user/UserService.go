@@ -894,7 +894,7 @@ func (impl UserServiceImpl) GetLoggedInUser(r *http.Request) (int32, error) {
 	userId, userType, err := impl.GetUserByToken(token)
 	// if user is of api-token type, then update lastUsedBy and lastUsedAt
 	if err == nil && userType == bean.USER_TYPE_API_TOKEN {
-		go impl.saveUserAudit(r, userId)
+		//go impl.saveUserAudit(r, userId)
 	}
 	return userId, err
 }

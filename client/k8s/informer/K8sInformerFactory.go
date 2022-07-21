@@ -2,20 +2,14 @@ package informer
 
 import (
 	"flag"
-	"os/user"
-	"path/filepath"
-	"sync"
-	"time"
-
 	"github.com/devtron-labs/authenticator/client"
 	"github.com/devtron-labs/template-cron-job/api/bean"
 	"go.uber.org/zap"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kubeinformers "k8s.io/client-go/informers"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
+	"os/user"
+	"path/filepath"
+	"sync"
 )
 
 func NewGlobalMapClusterNamespace() map[string]map[string]bool {
@@ -105,47 +99,49 @@ func (impl *K8sInformerFactoryImpl) BuildInformer(clusterInfo []*bean.ClusterInf
 func (impl *K8sInformerFactoryImpl) buildInformerAndNamespaceList(clusterName string, config *rest.Config, mutex *sync.Mutex) map[string]map[string]bool {
 	allNamespaces := make(map[string]bool)
 	impl.globalMapClusterNamespace[clusterName] = allNamespaces
-	clusterClient, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		impl.logger.Errorw("error in create k8s config", "err", err)
-		return impl.globalMapClusterNamespace
-	}
-	informerFactory := kubeinformers.NewSharedInformerFactoryWithOptions(clusterClient, time.Minute)
-	nsInformer := informerFactory.Core().V1().Namespaces()
-	stopper := make(chan struct{})
-	nsInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			impl.logger.Debugw("add event handler", "cluster", clusterName, "object", obj.(metav1.Object))
-			if mobject, ok := obj.(metav1.Object); ok {
-				mutex.Lock()
-				defer mutex.Unlock()
-				if _, ok := impl.globalMapClusterNamespace[clusterName]; !ok {
-					allNamespaces := make(map[string]bool)
-					allNamespaces[mobject.GetName()] = true
-					impl.globalMapClusterNamespace[clusterName] = allNamespaces
-				} else {
-					allNamespaces := impl.globalMapClusterNamespace[clusterName]
-					allNamespaces[mobject.GetName()] = true
-					impl.globalMapClusterNamespace[clusterName] = allNamespaces
-				}
-				//mutex.Unlock()
-			}
-		},
-		DeleteFunc: func(obj interface{}) {
-			if object, ok := obj.(metav1.Object); ok {
-				mutex.Lock()
-				defer mutex.Unlock()
-				if _, ok := impl.globalMapClusterNamespace[clusterName]; ok {
-					allNamespaces := impl.globalMapClusterNamespace[clusterName]
-					delete(allNamespaces, object.GetName())
-					impl.globalMapClusterNamespace[clusterName] = allNamespaces
+	/*
+		clusterClient, err := kubernetes.NewForConfig(config)
+		if err != nil {
+			impl.logger.Errorw("error in create k8s config", "err", err)
+			return impl.globalMapClusterNamespace
+		}
+		informerFactory := kubeinformers.NewSharedInformerFactoryWithOptions(clusterClient, time.Minute)
+		nsInformer := informerFactory.Core().V1().Namespaces()
+		stopper := make(chan struct{})
+		nsInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+			AddFunc: func(obj interface{}) {
+				impl.logger.Debugw("add event handler", "cluster", clusterName, "object", obj.(metav1.Object))
+				if mobject, ok := obj.(metav1.Object); ok {
+					mutex.Lock()
+					defer mutex.Unlock()
+					if _, ok := impl.globalMapClusterNamespace[clusterName]; !ok {
+						allNamespaces := make(map[string]bool)
+						allNamespaces[mobject.GetName()] = true
+						impl.globalMapClusterNamespace[clusterName] = allNamespaces
+					} else {
+						allNamespaces := impl.globalMapClusterNamespace[clusterName]
+						allNamespaces[mobject.GetName()] = true
+						impl.globalMapClusterNamespace[clusterName] = allNamespaces
+					}
 					//mutex.Unlock()
 				}
-			}
-		},
-	})
-	informerFactory.Start(stopper)
-	impl.informerStopper[clusterName] = stopper
+			},
+			DeleteFunc: func(obj interface{}) {
+				if object, ok := obj.(metav1.Object); ok {
+					mutex.Lock()
+					defer mutex.Unlock()
+					if _, ok := impl.globalMapClusterNamespace[clusterName]; ok {
+						allNamespaces := impl.globalMapClusterNamespace[clusterName]
+						delete(allNamespaces, object.GetName())
+						impl.globalMapClusterNamespace[clusterName] = allNamespaces
+						//mutex.Unlock()
+					}
+				}
+			},
+		})
+		informerFactory.Start(stopper)
+		impl.informerStopper[clusterName] = stopper
+	*/
 	return impl.globalMapClusterNamespace
 }
 

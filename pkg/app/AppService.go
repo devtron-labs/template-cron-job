@@ -26,6 +26,7 @@ import (
 	"github.com/robfig/cron/v3"
 	chart2 "k8s.io/helm/pkg/proto/hapi/chart"
 	"net/url"
+	"os"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -195,12 +196,12 @@ func NewAppService(
 		chartService:                     chartService,
 		helmAppClient:                    helmAppClient,
 	}
-	/*_, err := cron.AddFunc(TemplateFixCronExpr, appServiceImpl.TemplateFixForAllApps)
+	_, err := cron.AddFunc(TemplateFixCronExpr, appServiceImpl.TemplateFixForAllApps)
 	if err != nil {
 		logger.Errorw("error in starting TemplateFixForAllApps cron job", "err", err)
 		return nil
-	}*/
-	appServiceImpl.TemplateFixForAllApps()
+	}
+	//appServiceImpl.TemplateFixForAllApps()
 	return appServiceImpl
 }
 func (impl AppServiceImpl) getValuesFileForEnv(environmentId int) string {
@@ -1708,32 +1709,63 @@ func (impl AppServiceImpl) createHelmAppForCdPipeline(overrideRequest *bean.Valu
 	return true, nil
 }
 
-const TemplateFixCronExpr string = "*/5 * * * *"
+const TemplateFixCronExpr string = "0/10 * * * *"
+
+func (impl AppServiceImpl) writeTemplateEditResponseToFile(processedAppResult map[int]map[int]bool) {
+	impl.logger.Infow("data fix for apps completes ............", "processedAppResult", processedAppResult)
+	jsonString, err := json.Marshal(processedAppResult)
+	if err != nil {
+		impl.logger.Errorw(" error on writing result file", "err", err)
+		return
+	}
+	f, err := os.Create("/tmp/template-edit-result.txt")
+	if err != nil {
+		impl.logger.Errorw(" error on writing result file", "err", err)
+		return
+	}
+	defer f.Close()
+	_, err2 := f.WriteString(string(jsonString))
+	if err2 != nil {
+		impl.logger.Errorw(" error on writing result file", "err", err)
+		return
+	}
+}
 
 func (impl AppServiceImpl) TemplateFixForAllApps() {
-	impl.logger.Info("data fix cron ..........")
+	processedAppResult := make(map[int]map[int]bool)
+	defer impl.writeTemplateEditResponseToFile(processedAppResult)
+	impl.logger.Info("data fix for app, cron started")
 	apps, err := impl.appRepository.FindAll()
 	if err != nil {
-		impl.logger.Errorw("error fetching charts for app", "err", err)
+		impl.logger.Errorw("data fix for app, error fetching apps", "err", err)
 		return
 	}
 	content := "{{- range .Values.rawYaml }}\n---\n{{ toYaml . }}\n  {{- end -}}"
 	impl.logger.Infow("data fix for app", "content", content, "app size", len(apps))
 	for _, app := range apps {
-		impl.updateGenericInTemplateForApp(app.Id, content)
+		impl.updateGenericInTemplateForApp(app.Id, content, processedAppResult)
 	}
+	impl.logger.Infow("data fix for apps completes", "processedAppResult", processedAppResult)
 }
 
-func (impl AppServiceImpl) updateGenericInTemplateForApp(appId int, content string) {
-	impl.logger.Infow("data fix for app", "appId", appId)
+func (impl AppServiceImpl) updateGenericInTemplateForApp(appId int, content string, processedAppResult map[int]map[int]bool) {
 	charts, err := impl.chartRepository.FindActiveChartsByAppId(appId)
 	if err != nil {
-		impl.logger.Errorw("error fetching charts for app", "err", err, "appId", appId, "charts size", len(charts))
+		impl.logger.Errorw("data fix for app, error fetching charts for app", "err", err, "appId", appId)
 		return
 	}
 	impl.logger.Infow("data fix for app", "appId", appId, "charts size", len(charts))
 	count := 0
+	if _, ok := processedAppResult[appId]; !ok {
+		processedAppResult[appId] = make(map[int]bool)
+	}
+
 	for _, chart := range charts {
+		appResult := processedAppResult[appId]
+		if _, ok := appResult[chart.Id]; !ok {
+			appResult[chart.Id] = false
+			processedAppResult[appId] = appResult
+		}
 		chartRepoName := impl.GetChartRepoName(chart.GitRepoUrl)
 		chartGitAttr := &ChartConfig{
 			FileName:       "generic.yaml",
@@ -1741,7 +1773,7 @@ func (impl AppServiceImpl) updateGenericInTemplateForApp(appId int, content stri
 			ChartName:      chart.ChartName,
 			ChartLocation:  fmt.Sprintf("%s/templates", chart.ChartLocation),
 			ChartRepoName:  chartRepoName,
-			ReleaseMessage: "template generic content fix",
+			ReleaseMessage: "generic content fix for reference template",
 			UserName:       "devtron",
 			UserEmailId:    "devtron@devtron.ai",
 		}
@@ -1750,16 +1782,18 @@ func (impl AppServiceImpl) updateGenericInTemplateForApp(appId int, content stri
 			if err == pg.ErrNoRows {
 				gitOpsConfigBitbucket.BitBucketWorkspaceId = ""
 			} else {
-				impl.logger.Errorw("data fix for failed", "appId", appId, "chart", chart, "err", err)
+				impl.logger.Errorw("data fix for app, failed", "appId", appId, "chart", chart, "err", err)
 				continue
 			}
 		}
 		_, err = impl.gitFactory.Client.CommitValues(chartGitAttr, gitOpsConfigBitbucket.BitBucketWorkspaceId)
 		if err != nil {
-			impl.logger.Errorw("data fix for failed", "appId", appId, "chart", chart, "err", err)
+			impl.logger.Errorw("data fix for app, failed", "appId", appId, "chart", chart, "err", err)
 			continue
 		}
 		count = count + 1
+		appResult[chart.Id] = true
+		processedAppResult[appId] = appResult
 	}
-	impl.logger.Infow("data fix for app complete", "appId", appId, "charts size", len(charts), "succedded count", count)
+	impl.logger.Infow("data fix for app completed", "appId", appId, "charts size", len(charts), "succeeded count", count)
 }

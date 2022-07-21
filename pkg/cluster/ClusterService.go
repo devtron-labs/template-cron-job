@@ -97,7 +97,7 @@ func NewClusterServiceImpl(repository repository.ClusterRepository, logger *zap.
 		K8sUtil:            K8sUtil,
 		K8sInformerFactory: K8sInformerFactory,
 	}
-	go clusterService.buildInformer()
+	//go clusterService.buildInformer()
 	return clusterService
 }
 

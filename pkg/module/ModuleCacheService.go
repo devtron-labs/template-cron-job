@@ -72,7 +72,7 @@ func NewModuleCacheServiceImpl(logger *zap.SugaredLogger, K8sUtil *util.K8sUtil,
 
 		// listen in installer object to save status in-memory
 		// build informer to listen on installer object
-		go impl.buildInformerToListenOnInstallerObject()
+		//go impl.buildInformerToListenOnInstallerObject()
 	}
 
 	return impl

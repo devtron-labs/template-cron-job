@@ -361,12 +361,12 @@ func (impl *TerminalSessionHandlerImpl) GetTerminalSession(req *TerminalSessionR
 		bound:    make(chan error),
 		sizeChan: make(chan remotecommand.TerminalSize),
 	})
-	config, client, err := impl.getClientConfig(req)
+	/*config, client, err := impl.getClientConfig(req)
 	if err != nil {
 		impl.logger.Errorw("error in fetching config", "err", err)
 		return http.StatusInternalServerError, nil, err
 	}
-	go WaitForTerminal(client, config, req)
+	go WaitForTerminal(client, config, req)*/
 	return http.StatusOK, &TerminalMessage{SessionID: sessionID}, nil
 }
 

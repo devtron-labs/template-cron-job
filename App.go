@@ -76,7 +76,7 @@ func NewApp(router *router.MuxRouter,
 }
 
 func (app *App) Start() {
-	port := 8080 //TODO: extract from environment variable
+	port := 8089 //TODO: extract from environment variable
 	app.Logger.Debugw("starting server")
 	app.Logger.Infow("starting server on ", "port", port)
 	app.MuxRouter.Init()
