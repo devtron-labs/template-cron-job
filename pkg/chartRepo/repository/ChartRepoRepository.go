@@ -125,7 +125,7 @@ func (repositoryImpl ChartRepositoryImpl) FindActiveChartsByAppId(appId int) (ch
 	err = repositoryImpl.dbConnection.
 		Model(&activeCharts).
 		Where("app_id= ?", appId).
-		Where("active= ?", true).
+		//Where("active= ?", true).
 		Select()
 	return activeCharts, err
 }
