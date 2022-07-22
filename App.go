@@ -19,12 +19,16 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"fmt"
 	"github.com/devtron-labs/template-cron-job/api/router"
 	"github.com/devtron-labs/template-cron-job/pkg/app"
 	"github.com/go-pg/pg"
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
+	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -58,6 +62,30 @@ func (app *App) Start() {
 	app.Logger.Infow("starting server on ", "port", port)
 	app.MuxRouter.Init()
 	app.appService.TemplateFixForAllApps()
+	fn := func(w http.ResponseWriter, r *http.Request) {}
+	handler := http.HandlerFunc(fn)
+	server := &http.Server{Addr: fmt.Sprintf(":%d", port), Handler: handler}
+	app.server = server
+	var err error
+	if app.serveTls {
+		cert, err := tls.LoadX509KeyPair(
+			"localhost.crt",
+			"localhost.key",
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		server.TLSConfig = &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		}
+		err = server.ListenAndServeTLS("", "")
+	} else {
+		err = server.ListenAndServe()
+	}
+	if err != nil {
+		app.Logger.Errorw("error in startup", "err", err)
+		os.Exit(2)
+	}
 }
 
 func (app *App) Stop() {
