@@ -131,6 +131,10 @@ func (impl AppServiceImpl) updateGenericInTemplateForApp(appId int, content stri
 			appResult[chart.Id] = false
 			processedAppResult[appId] = appResult
 		}
+		if len(chart.GitRepoUrl) == 0 {
+			impl.logger.Warnw("data fix for app, skipped", "appId", appId, "chart", chart)
+			continue
+		}
 		chartRepoName := impl.GetChartRepoName(chart.GitRepoUrl)
 		chartGitAttr := &ChartConfig{
 			FileName:       "generic.yaml",
