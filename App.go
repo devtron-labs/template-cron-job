@@ -18,7 +18,6 @@
 package main
 
 import (
-	"context"
 	"github.com/devtron-labs/template-cron-job/api/router"
 	"github.com/devtron-labs/template-cron-job/pkg/app"
 	"github.com/go-pg/pg"
@@ -54,23 +53,17 @@ func NewApp(router *router.MuxRouter,
 
 func (app *App) Start() {
 	app.Logger.Infow("template fix job initiating", "time", time.Now())
-	app.appService.TemplateFixForAllApps()
+	app.appService.RefChartPatchForGitOpsApps()
 	app.Logger.Infow("template fix job stopped", "time", time.Now())
+	app.Stop()
 }
 
 func (app *App) Stop() {
 	app.Logger.Infow("orchestrator shutdown initiating")
-	timeoutContext, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	app.Logger.Infow("closing router")
-	err := app.server.Shutdown(timeoutContext)
-	if err != nil {
-		app.Logger.Errorw("error in mux router shutdown", "err", err)
-	}
 	app.Logger.Infow("closing db connection")
-	err = app.db.Close()
+	err := app.db.Close()
 	if err != nil {
 		app.Logger.Errorw("error in closing db connection", "err", err)
 	}
-
 	app.Logger.Infow("housekeeping done. exiting now")
 }

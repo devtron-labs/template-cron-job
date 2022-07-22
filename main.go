@@ -26,7 +26,6 @@ import (
 )
 
 func main() {
-
 	app, err := InitializeApp()
 	if err != nil {
 		log.Panic(err)
@@ -42,7 +41,6 @@ func main() {
 		os.Exit(0)
 	}()
 	//      gracefulStop end
-
 	app.Start()
 
 }

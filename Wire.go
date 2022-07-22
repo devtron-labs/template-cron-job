@@ -37,6 +37,7 @@ func InitializeApp() (*App, error) {
 		util.NewSugardLogger,
 		sql.PgSqlWireSet,
 		router.NewMuxRouter,
+		app2.GetPatchConfig,
 		app2.NewAppService,
 		wire.Bind(new(app2.AppService), new(*app2.AppServiceImpl)),
 		app.NewAppRepositoryImpl,
@@ -48,6 +49,7 @@ func InitializeApp() (*App, error) {
 		NewApp,
 		util.NewGitFactory,
 		util.NewGitCliUtil,
+
 
 	)
 	return &App{}, nil

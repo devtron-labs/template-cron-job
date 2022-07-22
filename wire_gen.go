@@ -42,7 +42,11 @@ func InitializeApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	appServiceImpl := app2.NewAppService(sugaredLogger, appRepositoryImpl, chartRepositoryImpl, gitFactory, gitOpsConfigRepositoryImpl)
+	patchConfig, err := app2.GetPatchConfig()
+	if err != nil {
+		return nil, err
+	}
+	appServiceImpl := app2.NewAppService(sugaredLogger, appRepositoryImpl, chartRepositoryImpl, gitFactory, gitOpsConfigRepositoryImpl, patchConfig)
 	muxRouter := router.NewMuxRouter(sugaredLogger, gitOpsConfigRepositoryImpl, appServiceImpl)
 	mainApp := NewApp(muxRouter, sugaredLogger, db, appServiceImpl)
 	return mainApp, nil
