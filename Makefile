@@ -43,9 +43,3 @@ docker-build-push: docker-build-image
 	docker push ${REGISTRY}/template-cron-job:${TAG}
 
 #############################################################################
-
-build-all: build
-	make --directory ./cmd/external-app build
-
-build-ea:
-	make --directory ./cmd/external-app build
