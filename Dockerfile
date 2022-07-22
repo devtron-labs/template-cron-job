@@ -7,7 +7,7 @@ RUN apk add --update make
 RUN go get github.com/google/wire/cmd/wire
 WORKDIR /go/src/github.com/devtron-labs/template-cron-job
 ADD . /go/src/github.com/devtron-labs/template-cron-job/
-#RUN GOOS=linux make build-all
+RUN GOOS=linux make
 
 # uncomment this post build arg
 FROM alpine:3.15.0 as  devtron-all
