@@ -11,7 +11,7 @@ require (
 	github.com/argoproj/argo v2.4.1+incompatible
 	github.com/argoproj/argo-cd v1.2.3
 	github.com/argoproj/pkg v0.0.0-20190830164810-036726ef3c78 // indirect
-	github.com/aws/aws-sdk-go v1.25.16
+	github.com/aws/aws-sdk-go v1.33.0
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/casbin/casbin v1.9.1
 	github.com/casbin/xorm-adapter v1.0.1-0.20190716004226-a317737a1007
