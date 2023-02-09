@@ -185,7 +185,7 @@ github.com/docker/spdystream
 github.com/docker/spdystream/spdy
 # github.com/elazarl/goproxy v0.0.0-20210110162100-a92cc753f88e
 ## explicit
-# github.com/emicklei/go-restful v2.11.0+incompatible
+# github.com/emicklei/go-restful v2.16.0+incompatible
 ## explicit
 github.com/emicklei/go-restful
 github.com/emicklei/go-restful/log
@@ -474,7 +474,6 @@ github.com/prometheus/client_golang/api/prometheus/v1
 github.com/prometheus/client_golang/prometheus
 github.com/prometheus/client_golang/prometheus/internal
 github.com/prometheus/client_golang/prometheus/promauto
-github.com/prometheus/client_golang/prometheus/promhttp
 # github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4
 github.com/prometheus/client_model/go
 # github.com/prometheus/common v0.7.0
