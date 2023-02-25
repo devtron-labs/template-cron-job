@@ -99,7 +99,7 @@ require (
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.0.0-20191004102349-159aefb8556b
-	k8s.io/apimachinery v0.0.0-20190816221834-a9f1d8a9c101
+	k8s.io/apimachinery v0.15.7
 	k8s.io/client-go v11.0.1-0.20190820062731-7e43eff7c80a+incompatible
 	k8s.io/helm v2.12.3+incompatible
 	k8s.io/kube-openapi v0.0.0-20190918143330-0270cf2f1c1d // indirect
