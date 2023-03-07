@@ -104,7 +104,7 @@ require (
 	k8s.io/helm v2.12.3+incompatible
 	k8s.io/kube-openapi v0.0.0-20190918143330-0270cf2f1c1d // indirect
 	k8s.io/utils v0.0.0-20191010214722-8d271d903fe4
-	mellium.im/sasl v0.2.1 // indirect
+	mellium.im/sasl v0.3.1 // indirect
 	sigs.k8s.io/yaml v1.3.0
 	xorm.io/core v0.7.2 // indirect
 )
